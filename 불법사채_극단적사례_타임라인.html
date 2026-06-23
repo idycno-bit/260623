@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>불법사채 극단적 사례 타임라인</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto Mono', sans-serif;
+            background: #0f0f0f;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff2e2e 0%, #8b0000 100%);
+            padding: 40px;
+            border-radius: 8px;
+            margin-bottom: 40px;
+            text-align: center;
+            border-left: 5px solid #fff;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .warning-icon {
+            font-size: 44px;
+        }
+
+        .header p {
+            font-size: 15px;
+            opacity: 0.95;
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            font-size: 13px;
+            opacity: 0.85;
+            color: #ffcccc;
+        }
+
+        .timeline-container {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        /* 타임라인 중앙 선 */
+        .timeline-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, #ff2e2e, #ff6b6b, #ff2e2e);
+            transform: translateX(-50%);
+        }
+
+        .timeline-items {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .timeline-item {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .timeline-item:nth-child(even) {
+            direction: rtl;
+        }
+
+        .timeline-item:nth-child(even) > * {
+            direction: ltr;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: 20px;
+            height: 20px;
+            background: #ff2e2e;
+            border: 4px solid #0f0f0f;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 20px rgba(255, 46, 46, 0.5);
+        }
+
+        .timeline-item:hover .timeline-dot {
+            width: 28px;
+            height: 28px;
+            transform: translateX(-50%) translateY(-4px);
+            box-shadow: 0 0 30px rgba(255, 46, 46, 0.8);
+        }
+
+        .timeline-content {
+            background: #1a1a1a;
+            padding: 25px;
+            border-radius: 8px;
+            border-left: 4px solid #ff2e2e;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .timeline-content:hover {
+            background: #252525;
+            border-left-color: #ff6b6b;
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(255, 46, 46, 0.2);
+        }
+
+        .timeline-date {
+            color: #ff6b6b;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .date-icon {
+            font-size: 16px;
+        }
+
+        .timeline-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .timeline-summary {
+            font-size: 13px;
+            color: #bbb;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .timeline-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #333;
+        }
+
+        .stat-item {
+            font-size: 12px;
+        }
+
+        .stat-label {
+            color: #888;
+        }
+
+        .stat-value {
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+
+        .expand-btn {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 6px 12px;
+            background: rgba(255, 46, 46, 0.2);
+            color: #ff6b6b;
+            border: 1px solid #ff6b6b;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .expand-btn:hover {
+            background: rgba(255, 46, 46, 0.3);
+        }
+
+        /* 상세 정보 모달 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: #1a1a1a;
+            border: 2px solid #ff2e2e;
+            border-radius: 8px;
+            padding: 40px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 32px;
+            height: 32px;
+            background: #ff2e2e;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            background: #ff6b6b;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            color: #ff6b6b;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-section {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #333;
+        }
+
+        .modal-section:last-child {
+            border-bottom: none;
+        }
+
+        .modal-section h3 {
+            color: #ff6b6b;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .modal-section p {
+            font-size: 14px;
+            color: #ccc;
+            line-height: 1.8;
+            margin-bottom: 8px;
+        }
+
+        .highlight {
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+
+        .case-number {
+            display: inline-block;
+            background: rgba(255, 46, 46, 0.1);
+            padding: 4px 8px;
+            border-left: 2px solid #ff6b6b;
+            margin-top: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .danger-box {
+            background: rgba(255, 46, 46, 0.1);
+            border-left: 4px solid #ff2e2e;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+
+        .danger-box h4 {
+            color: #ff6b6b;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .danger-box ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .danger-box li {
+            color: #bbb;
+            font-size: 12px;
+            margin-bottom: 6px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .danger-box li:before {
+            content: "⚠";
+            position: absolute;
+            left: 0;
+            color: #ff2e2e;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 60px;
+            padding: 20px;
+            border-top: 1px solid #333;
+            color: #666;
+            font-size: 12px;
+        }
+
+        .footer-highlight {
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .timeline-line {
+                left: 20px;
+            }
+
+            .timeline-item {
+                grid-template-columns: 1fr;
+                gap: 0;
+                margin-left: 50px;
+            }
+
+            .timeline-item:nth-child(even) {
+                direction: ltr;
+            }
+
+            .timeline-dot {
+                left: 20px;
+                top: 0;
+            }
+
+            .timeline-content {
+                margin-top: 20px;
+            }
+
+            .header h1 {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <span class="warning-icon">⚠️</span>
+                불법사채 극단적 사례
+            </h1>
+            <p>2024~2025년 실제 발생한 사건들</p>
+            <p class="subtitle">각 사건을 클릭하면 상세 정보를 확인할 수 있습니다</p>
+        </div>
+
+        <div class="timeline-container">
+            <div class="timeline-line"></div>
+
+            <div class="timeline-items">
+                <!-- 사건 1: 이실장 사건 -->
+                <div class="timeline-item">
+                    <div class="timeline-content" onclick="openModal('case1')">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-date">
+                            <span class="date-icon">📅</span>
+                            2026년 3월 (현재 진행중)
+                        </div>
+                        <div class="timeline-title">이실장 사건</div>
+                        <div class="timeline-summary">
+                            30만원이 6일 만에 55만원으로 변신. 연 6,833% 금리의 불법사채로 악명 높음.
+                        </div>
+                        <div class="timeline-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">원금</div>
+                                <div class="stat-value">30만원</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">6일 후</div>
+                                <div class="stat-value">55만원</div>
+                            </div>
+                        </div>
+                        <button class="expand-btn">상세보기</button>
+                    </div>
+                </div>
+
+                <!-- 사건 2: 30대 싱글맘 자살 -->
+                <div class="timeline-item">
+                    <div class="timeline-content" onclick="openModal('case2')">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-date">
+                            <span class="date-icon">📅</span>
+                            2024년 9월 (사망)
+                        </div>
+                        <div class="timeline-title">30대 싱글맘 극단적 선택</div>
+                        <div class="timeline-summary">
+                            유치원생 딸을 홀로 키우던 여성이 불법사채 협박에 시달리다 극단적 선택. 연 3,000% 고리.
+                        </div>
+                        <div class="timeline-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">금리</div>
+                                <div class="stat-value">연 3,000%</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">결과</div>
+                                <div class="stat-value">비극적</div>
+                            </div>
+                        </div>
+                        <button class="expand-btn">상세보기</button>
+                    </div>
+                </div>
+
+                <!-- 사건 3: 건우씨 가족 협박 -->
+                <div class="timeline-item">
+                    <div class="timeline-content" onclick="openModal('case3')">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-date">
+                            <span class="date-icon">📅</span>
+                            2025년 초 (현재 진행중)
+                        </div>
+                        <div class="timeline-title">건우씨 가족 협박 & 조직 진입</div>
+                        <div class="timeline-summary">
+                            사채 빚을 못 갚자, 조직이 딸이 다니는 유치원에 협박 전화. 결국 추심원으로 강제 입사.
+                        </div>
+                        <div class="timeline-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">협박 대상</div>
+                                <div class="stat-value">유치원생 딸</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">악영향</div>
+                                <div class="stat-value">가족 전체</div>
+                            </div>
+                        </div>
+                        <button class="expand-btn">상세보기</button>
+                    </div>
+                </div>
+
+                <!-- 사건 4: A씨 악순환 -->
+                <div class="timeline-item">
+                    <div class="timeline-content" onclick="openModal('case4')">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-date">
+                            <span class="date-icon">📅</span>
+                            2024~2025년 (1년 이상)
+                        </div>
+                        <div class="timeline-title">A씨 40곳 빚 악순환</div>
+                        <div class="timeline-summary">
+                            100만원을 빌렸다가, 1시간 지연 수수료로 시작된 악순환. 40곳 사채업체에서 2,200만원 빚.
+                        </div>
+                        <div class="timeline-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">초기 차용</div>
+                                <div class="stat-value">100만원</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">최종 빚</div>
+                                <div class="stat-value">2,200만원</div>
+                            </div>
+                        </div>
+                        <button class="expand-btn">상세보기</button>
+                    </div>
+                </div>
+
+                <!-- 사건 5: SNS 신원 공개 -->
+                <div class="timeline-item">
+                    <div class="timeline-content" onclick="openModal('case5')">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-date">
+                            <span class="date-icon">📅</span>
+                            2025년 6월 (현재 진행중)
+                        </div>
+                        <div class="timeline-title">SNS 신원 공개 (인스타그램)</div>
+                        <div class="timeline-summary">
+                            5개 불법 추심 계정에 128명의 사진, 주민번호, 거주지 전체 공개. 40~60만원 소액 대출.
+                        </div>
+                        <div class="timeline-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">피해자 수</div>
+                                <div class="stat-value">128명</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">공개 정보</div>
+                                <div class="stat-value">전체</div>
+                            </div>
+                        </div>
+                        <button class="expand-btn">상세보기</button>
+                    </div>
+                </div>
+
+                <!-- 사건 6: 번개탄 추심단 -->
+                <div class="timeline-item">
+                    <div class="timeline-content" onclick="openModal('case6')">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-date">
+                            <span class="date-icon">📅</span>
+                            2020~2025년 (4년간)
+                        </div>
+                        <div class="timeline-title">번개탄 추심단 조직</div>
+                        <div class="timeline-summary">
+                            대구 근거 사채 조직. 연 이율 수천%의 초고금리. 수백 명 피해자 발생.
+                        </div>
+                        <div class="timeline-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">활동 기간</div>
+                                <div class="stat-value">4년</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">피해자</div>
+                                <div class="stat-value">수백 명</div>
+                            </div>
+                        </div>
+                        <button class="expand-btn">상세보기</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 모달 -->
+        <div id="caseModal" class="modal">
+            <div class="modal-content">
+                <button class="modal-close" onclick="closeModal()">×</button>
+                <div id="modalBody"></div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>💡 <span class="footer-highlight">중요:</span> 이 모든 사건은 실제로 발생한 것입니다.</p>
+            <p>불법사채 피해가 의심되면 즉시 1332 또는 112로 신고하세요.</p>
+        </div>
+    </div>
+
+    <script>
+        const cases = {
+            case1: {
+                title: '이실장 사건',
+                date: '2026년 3월 (진행중)',
+                icon: '⚠️',
+                sections: [
+                    {
+                        title: '개요',
+                        content: `<p>불법사채의 대표적인 극단적 사례로 알려진 "이실장" 사건입니다.</p>`
+                    },
+                    {
+                        title: '금리 구조',
+                        content: `<p><span class="highlight">원금: 30만원</span></p>
+                                 <p><span class="highlight">6일 후 상환액: 55만원</span></p>
+                                 <p><span class="highlight">발생 이자: 25만원 (6일간)</span></p>
+                                 <p><span class="highlight">연환산 금리: 약 6,833%</span></p>`
+                    },
+                    {
+                        title: '악질성',
+                        content: `<p>• 주 이자가 극도로 높음 (주 80%)</p>
+                                 <p>• 신분증, 사진, 지인 연락처를 담보로 요구</p>
+                                 <p>• 연체 시 SNS에 신원 공개 협박</p>`
+                    },
+                    {
+                        title: '시사점',
+                        content: `<p>당신의 금리 계산기에서 "주 80%" 옵션의 기본값이 이 사건입니다.</p>
+                                 <p>6일 만에 원금의 183%를 갚아야 하는 악순환의 시작입니다.</p>`
+                    }
+                ]
+            },
+            case2: {
+                title: '30대 싱글맘 극단적 선택',
+                date: '2024년 9월',
+                icon: '🚨',
+                sections: [
+                    {
+                        title: '비극',
+                        content: `<p><span class="highlight">유치원생 딸을 홀로 키우던 30대 여성</span>이 불법사채 협박에 시달리다 극단적 선택을 했습니다.</p>`
+                    },
+                    {
+                        title: '상황',
+                        content: `<p>• 금리: 연 3,000% 초고금리</p>
+                                 <p>• 협박 내용: 모욕적 메시지, 지인 협박</p>
+                                 <p>• 경찰 신고 후 1개월이 지났으나 사채업자 여전히 미적발</p>`
+                    },
+                    {
+                        title: '사회적 충격',
+                        content: `<p>이 사건 이후 사회적 공분이 커져 경찰이 전국 253개 경찰서에 전담수사팀을 신설했습니다.</p>
+                                 <p>그런데도 여전히 불법사채 피해는 증가 중입니다.</p>`
+                    },
+                    {
+                        title: '법적 교훈',
+                        content: `<p>사건 이후 개정된 대부업법(2026.01.02 시행)에서 연 60% 초과 금리는 원금과 이자 전부 무효입니다.</p>`
+                    }
+                ]
+            },
+            case3: {
+                title: '건우씨 가족 협박 & 조직 진입',
+                date: '2025년 초',
+                icon: '👨‍👧',
+                sections: [
+                    {
+                        title: '시작',
+                        content: `<p><span class="highlight">건우씨(가명)</span>는 불법사채를 해결하지 못했습니다.</p>`
+                    },
+                    {
+                        title: '악질 추심',
+                        content: `<p>조직원들은 <span class="highlight">건우씨 딸이 다니는 유치원에 전화</span>해 협박했습니다:</p>
+                                 <p>• "(딸이) 몸을 팔고 다닌다"</p>
+                                 <p>• "동생과 부적절한 관계를 가졌다"</p>
+                                 <p>• 어린이집 교사까지 협박</p>`
+                    },
+                    {
+                        title: '극단적 결과',
+                        content: `<p>결국 <span class="highlight">건우씨는 조직에 들어가 추심원으로 일하기로 결심했습니다.</span></p>
+                                 <p>조직이 제공한 거처에서 숙식하며 다른 피해자들을 협박하기 시작했습니다.</p>`
+                    },
+                    {
+                        title: '악순환',
+                        content: `<p>• 20만원 추심 → 7만원 보너스</p>
+                                 <p>• 하루 25명 추심 → 200만원 현금 보너스</p>
+                                 <p>이렇게 더 악랄해지는 악순환이 계속됩니다.</p>`
+                    }
+                ]
+            },
+            case4: {
+                title: 'A씨 40곳 빚 악순환',
+                date: '2024~2025년 (1년 이상)',
+                icon: '📉',
+                sections: [
+                    {
+                        title: '시작',
+                        content: `<p>지난 6월까지 불법사금융 추심에 시달리던 <span class="highlight">A씨(가명)</span></p>`
+                    },
+                    {
+                        title: '첫 단계',
+                        content: `<p>• 초기 차용: 100만원</p>
+                                 <p>• 상환 조건: 5일 후 180만원</p>
+                                 <p>• 1시간 지연 → 30만원 연장비 추가</p>`
+                    },
+                    {
+                        title: '악순환의 시작',
+                        content: `<p>A씨는 첫 빚을 갚기 위해 <span class="highlight">또 다른 불법사채</span>를 이용했습니다.</p>
+                                 <p>그 빚도 제때 갚지 못하는 악순환에 빠졌습니다.</p>`
+                    },
+                    {
+                        title: '최종 상황',
+                        content: `<p>• 40곳 이상 사채업체에서 빌림</p>
+                                 <p>• <span class="highlight">총 빚: 2,200만원</span></p>
+                                 <p>• 자신뿐 아니라 가족과 지인도 협박 대상</p>
+                                 <p>• 결국 원금의 3배 이상을 갚고서야 벗어남</p>`
+                    }
+                ]
+            },
+            case5: {
+                title: 'SNS 신원 공개 (인스타그램)',
+                date: '2025년 6월',
+                icon: '📱',
+                sections: [
+                    {
+                        title: '적발',
+                        content: `<p>서울경제신문이 인스타그램의 불법 추심 계정 5개를 적발했습니다.</p>`
+                    },
+                    {
+                        title: '규모',
+                        content: `<p>• <span class="highlight">128명의 사진과 영상 공개</span></p>
+                                 <p>• 이름, 주민등록번호, 거주지 노출</p>
+                                 <p>• 40만~60만원 소액 대출 (3~7일 만기)</p>`
+                    },
+                    {
+                        title: '추심 방법',
+                        content: `<p>1차: 지인에게 직접 채무 사실 알리기</p>
+                                 <p>2차: SNS에 사진과 신원 공개</p>
+                                 <p>3차: 100회 이상 공유되도록 확산</p>`
+                    },
+                    {
+                        title: '악질 조건',
+                        content: `<p><span class="highlight">"연체 시 SNS 모든 지인에게 추심 동의"</span></p>
+                                 <p><span class="highlight">"초상권 포기 동의"</span></p>
+                                 <p>일부 게시물은 피해자를 "도박중독자", "불륜" 등으로 모욕</p>`
+                    }
+                ]
+            },
+            case6: {
+                title: '번개탄 추심단 조직',
+                date: '2020~2025년 (4년간)',
+                icon: '🚔',
+                sections: [
+                    {
+                        title: '적발',
+                        content: `<p>서울경찰청이 연 6만%에 달하는 초고금리 불법사채업 조직을 검거했습니다.</p>`
+                    },
+                    {
+                        title: '조직 규모',
+                        content: `<p>• 32명 조직원</p>
+                                 <p>• 17명 검찰 송치</p>
+                                 <p>• 11명 구속</p>
+                                 <p>• 수백 명 피해자</p>`
+                    },
+                    {
+                        title: '악질성',
+                        content: `<p>• 피해자의 얼굴 사진이 담긴 전단 제작 및 살포</p>
+                                 <p>• 십수 명이 한꺼번에 협박</p>
+                                 <p>• 단톡방에 피해자 지인까지 초대해 허위 사실 유포</p>`
+                    },
+                    {
+                        title: '최신 기법',
+                        content: `<p><span class="highlight">ATM 스마트출금:</span> 경찰 수사 회피 기술</p>
+                                 <p>피해자가 인증번호 실시간 제공 → 업자가 ATM에서 직접 출금</p>
+                                 <p>계좌 추적 불가능</p>`
+                    }
+                ]
+            }
+        };
+
+        function openModal(caseId) {
+            const caseData = cases[caseId];
+            let html = `<div class="modal-title">
+                            <span>${caseData.icon}</span>
+                            ${caseData.title}
+                        </div>
+                        <div style="color: #ff6b6b; margin-bottom: 20px; font-size: 13px;">
+                            ${caseData.date}
+                        </div>`;
+
+            caseData.sections.forEach(section => {
+                html += `<div class="modal-section">
+                            <h3>${section.title}</h3>
+                            ${section.content}
+                        </div>`;
+            });
+
+            html += `<div class="danger-box">
+                        <h4>🚨 주의</h4>
+                        <ul>
+                            <li>이 모든 사건은 실제로 발생한 것입니다</li>
+                            <li>불법사채 피해 신고: 1332 또는 112</li>
+                            <li>법률 상담: 132 (법률구조공단)</li>
+                        </ul>
+                    </div>`;
+
+            document.getElementById('modalBody').innerHTML = html;
+            document.getElementById('caseModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('caseModal').classList.remove('active');
+        }
+
+        // 모달 외부 클릭 시 닫기
+        document.getElementById('caseModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // ESC 키 눌렀을 때 닫기
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

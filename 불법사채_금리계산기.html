@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>불법사채 금리 계산기 - 당신이 얼마를 갚아야 할까요?</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto Mono', sans-serif;
+            background: #0f0f0f;
+            color: #fff;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff2e2e 0%, #8b0000 100%);
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 5px solid #fff;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .warning-icon {
+            font-size: 36px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.95;
+        }
+
+        .case-info {
+            background: rgba(255, 46, 46, 0.1);
+            border-left: 4px solid #ff2e2e;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+
+        .case-info h3 {
+            color: #ff6b6b;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .case-info p {
+            font-size: 13px;
+            color: #ccc;
+            margin-bottom: 5px;
+        }
+
+        .simulator {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .simulator {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .input-section {
+            background: #1a1a1a;
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #aaa;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            background: #0f0f0f;
+            border: 2px solid #333;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #ff2e2e;
+            background: #1a1a1a;
+        }
+
+        .input-helper {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .preset-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .preset-btn {
+            padding: 10px;
+            background: #333;
+            border: 1px solid #555;
+            color: #aaa;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .preset-btn:hover {
+            background: #ff2e2e;
+            color: #fff;
+            border-color: #ff2e2e;
+        }
+
+        .preset-btn.active {
+            background: #ff2e2e;
+            color: #fff;
+            border-color: #ff2e2e;
+        }
+
+        .result-section {
+            background: #1a1a1a;
+            padding: 25px;
+            border-radius: 8px;
+            border: 2px solid #ff2e2e;
+        }
+
+        .result-item {
+            margin-bottom: 20px;
+        }
+
+        .result-label {
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 5px;
+        }
+
+        .result-value {
+            font-size: 28px;
+            color: #ff6b6b;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+        }
+
+        .result-value.safe {
+            color: #51cf66;
+        }
+
+        .timeline {
+            background: #0f0f0f;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .timeline h4 {
+            color: #ff6b6b;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .timeline-item {
+            display: flex;
+            margin-bottom: 12px;
+            font-size: 13px;
+        }
+
+        .timeline-day {
+            color: #666;
+            width: 40px;
+            flex-shrink: 0;
+        }
+
+        .timeline-amount {
+            color: #ff6b6b;
+            font-weight: bold;
+            width: 100px;
+            flex-shrink: 0;
+        }
+
+        .timeline-description {
+            color: #aaa;
+        }
+
+        .chart-container {
+            background: #0f0f0f;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .chart-container h4 {
+            color: #ff6b6b;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .bar {
+            display: flex;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+
+        .bar-label {
+            width: 60px;
+            font-size: 12px;
+            color: #999;
+            flex-shrink: 0;
+        }
+
+        .bar-visual {
+            height: 30px;
+            background: linear-gradient(90deg, #ff2e2e, #ff6b6b);
+            border-radius: 4px;
+            margin-right: 10px;
+            min-width: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 8px;
+            color: #fff;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .info-section {
+            background: #1a1a1a;
+            padding: 25px;
+            border-radius: 8px;
+            margin-top: 30px;
+            border: 1px solid #333;
+        }
+
+        .info-section h3 {
+            color: #ff6b6b;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .info-text {
+            font-size: 13px;
+            color: #bbb;
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+
+        .info-text strong {
+            color: #fff;
+        }
+
+        .contact-box {
+            background: rgba(255, 46, 46, 0.1);
+            border-left: 4px solid #ff2e2e;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .contact-label {
+            color: #ff6b6b;
+            font-weight: bold;
+            width: 80px;
+            flex-shrink: 0;
+        }
+
+        .contact-number {
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+
+        .law-box {
+            background: #0f0f0f;
+            border-left: 4px solid #51cf66;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 15px;
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .law-box strong {
+            color: #51cf66;
+        }
+
+        .danger-highlight {
+            background: rgba(255, 46, 46, 0.2);
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 15px;
+            border: 1px solid rgba(255, 46, 46, 0.5);
+        }
+
+        .danger-highlight h4 {
+            color: #ff6b6b;
+            margin-bottom: 8px;
+        }
+
+        .danger-highlight ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .danger-highlight li {
+            color: #ccc;
+            font-size: 13px;
+            margin-bottom: 6px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .danger-highlight li:before {
+            content: "⚠";
+            position: absolute;
+            left: 0;
+            color: #ff2e2e;
+        }
+
+        .cta-button {
+            background: #ff2e2e;
+            color: #fff;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+            transition: background 0.3s;
+        }
+
+        .cta-button:hover {
+            background: #ff6b6b;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+            color: #666;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <span class="warning-icon">⚠️</span>
+                불법사채 금리 계산기
+            </h1>
+            <p>당신이 빌린 돈이 얼마가 될까요? 실제 불법사채 방식으로 계산해봅시다.</p>
+        </div>
+
+        <div class="case-info">
+            <h3>📰 실제 사례: 이실장 사건 (2026년 3월)</h3>
+            <p><strong>원금:</strong> 30만원</p>
+            <p><strong>6일 후 상환액:</strong> 55만원 (+ 25만원 이자)</p>
+            <p><strong>연환산 금리:</strong> 약 6,800%</p>
+            <p style="color: #ff6b6b; margin-top: 10px;">👇 아래에서 당신의 상황을 입력해 계산해보세요</p>
+        </div>
+
+        <div class="simulator">
+            <div class="input-section">
+                <h3 style="margin-bottom: 20px; color: #ff6b6b;">📊 상황 설정</h3>
+
+                <div class="input-group">
+                    <label>빌릴 금액 (원)</label>
+                    <input type="number" id="principal" value="300000" min="10000" step="10000">
+                    <div class="input-helper">최소 10,000원 ~ 최대 5,000,000원</div>
+                </div>
+
+                <div class="input-group">
+                    <label>주간 이자율 (%)</label>
+                    <input type="number" id="weeklyRate" value="80" min="10" max="500" step="5">
+                    <div class="input-helper">실제 불법사채: 주 50% ~ 200%</div>
+                    <div class="preset-buttons">
+                        <button class="preset-btn active" onclick="setWeeklyRate(80)">주 80%</button>
+                        <button class="preset-btn" onclick="setWeeklyRate(120)">주 120%</button>
+                        <button class="preset-btn" onclick="setWeeklyRate(150)">주 150%</button>
+                        <button class="preset-btn" onclick="setWeeklyRate(200)">주 200%</button>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>상환 기간</label>
+                    <select id="periodType" onchange="updateCalculation()" style="width: 100%; padding: 12px; background: #0f0f0f; border: 2px solid #333; border-radius: 4px; color: #fff; cursor: pointer;">
+                        <option value="days">일 단위</option>
+                        <option value="weeks">주 단위</option>
+                        <option value="months">개월 단위</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>상환 기간 수</label>
+                    <input type="number" id="period" value="6" min="1" max="365">
+                    <div class="input-helper" id="periodHelper">6일 (이실장 사건 기준)</div>
+                </div>
+
+                <button onclick="updateCalculation()" style="background: #ff2e2e; color: #fff; border: none; padding: 12px; border-radius: 4px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 20px;">계산하기</button>
+            </div>
+
+            <div class="result-section">
+                <h3 style="color: #ff6b6b; margin-bottom: 20px;">💸 계산 결과</h3>
+
+                <div class="result-item">
+                    <div class="result-label">빌린 금액</div>
+                    <div class="result-value" id="resultPrincipal">300,000원</div>
+                </div>
+
+                <div class="result-item">
+                    <div class="result-label">발생 이자</div>
+                    <div class="result-value" id="resultInterest">250,000원</div>
+                </div>
+
+                <div class="result-item">
+                    <div class="result-label">상환해야 할 총액</div>
+                    <div class="result-value" id="resultTotal">550,000원</div>
+                </div>
+
+                <div class="result-item" style="border-top: 1px solid #333; padding-top: 15px; margin-top: 15px;">
+                    <div class="result-label">실제 금리 (연환산)</div>
+                    <div class="result-value" id="resultAnnual">6,833%</div>
+                </div>
+
+                <div class="chart-container">
+                    <h4>상환 일정</h4>
+                    <div id="timelineContainer"></div>
+                </div>
+
+                <div class="chart-container">
+                    <h4>원금 vs 이자 비교</h4>
+                    <div class="bar">
+                        <div class="bar-label">원금</div>
+                        <div class="bar-visual" id="barPrincipal" style="width: 33%;">300K</div>
+                    </div>
+                    <div class="bar">
+                        <div class="bar-label">이자</div>
+                        <div class="bar-visual" id="barInterest" style="width: 100%;">250K</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h3>🚨 불법사채의 위험성</h3>
+
+            <div class="info-text">
+                <strong>법적 지위:</strong> 연 20% 초과 이자는 무효입니다.<br>
+                개정 대부업법(2026.01.02 시행)에 따르면 <strong>연 60% 초과 시 원금과 이자 모두 청구 불가</strong>합니다.
+            </div>
+
+            <div class="danger-highlight">
+                <h4>⚠️ 불법사채 피해 패턴</h4>
+                <ul>
+                    <li><strong>1단계:</strong> 저신용자를 겨냥한 SNS 광고 (합법금리 광고)</li>
+                    <li><strong>2단계:</strong> 상담 중 불법 고금리로 전환</li>
+                    <li><strong>3단계:</strong> 신분증, 사진, 지인 연락처 담보 요구</li>
+                    <li><strong>4단계:</strong> 연체 시 SNS에 신원 공개 (협박)</li>
+                    <li><strong>5단계:</strong> 지인·가족에게 채무 사실 광고 (인격 살인)</li>
+                </ul>
+            </div>
+
+            <div class="info-text" style="margin-top: 20px;">
+                <strong>2026년 통계:</strong> 불법사금융 피해자 100만 명 이상 (추정)<br>
+                실제 신고율은 15~20% (보복 공포로 대부분 미신고)<br>
+                연체 시 추심 피해: 2020년 580건 → 2024년 2,429건 (5배 증가)
+            </div>
+
+            <div class="law-box">
+                <strong>✓ 법적 구제 방법 (당신의 권리)</strong><br><br>
+                <strong>1) 연 60% 초과 무효화:</strong> 대부업법 제8조의2<br>
+                원금과 이자 전부 청구 불가 → 무효확인 소송으로 100% 면책<br><br>
+                <strong>2) 채무자대리인 제도:</strong> 즉시 신청 시 추심 중단 (99% 효과)<br>
+                비용: 무료 (법률구조공단)<br><br>
+                <strong>3) SNS 신원 공개 삭제:</strong> 경찰 고발 + 플랫폼 신고<br>
+                반인권적 행위로 형사 처벌 가능<br><br>
+                <strong>4) 계좌 차단:</strong> 신고 시 불법사채 관련 계좌 즉시 동결<br>
+                범죄 수익 원천 차단
+            </div>
+
+            <div class="contact-box">
+                <h4 style="color: #ff6b6b; margin-bottom: 12px;">📞 긴급 신고 연락처</h4>
+                <div class="contact-item">
+                    <span class="contact-label">불법사금융:</span>
+                    <span class="contact-number">☎ 1332</span>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-label">긴급 신고:</span>
+                    <span class="contact-number">☎ 112</span>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-label">법률상담:</span>
+                    <span class="contact-number">☎ 132 (법률구조공단)</span>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-label">온라인:</span>
+                    <span class="contact-number">fss.or.kr (불법사금융 지킴이)</span>
+                </div>
+            </div>
+
+            <div class="danger-highlight" style="margin-top: 20px; border-color: #51cf66; background: rgba(81, 207, 102, 0.1);">
+                <h4 style="color: #51cf66;">✅ 현재 가능한 대응</h4>
+                <ul style="list-style: none;">
+                    <li style="color: #51cf66;">
+                        <span style="color: #51cf66;">✓</span>
+                        <strong>이미 피해를 입었다면:</strong> 채무자대리인 즉시 신청 (1주일 내 추심 중단)
+                    </li>
+                    <li style="color: #51cf66;">
+                        <span style="color: #51cf66;">✓</span>
+                        <strong>60% 초과 금리:</strong> 무효화 소송 (95% 승소율, 무료 법률 지원 가능)
+                    </li>
+                    <li style="color: #51cf66;">
+                        <span style="color: #51cf66;">✓</span>
+                        <strong>SNS 협박:</strong> 형사 고소 가능 (협박죄, 모욕죄, 명예훼손죄)
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>이 계산기는 교육 목적으로 제작되었습니다.</p>
+            <p>불법사채로 의심되는 경우 즉시 1332로 신고하세요.</p>
+            <p style="margin-top: 10px; color: #555;">데이터 출처: 금융감독원, 경찰청, 법원 판례 (2026년 기준)</p>
+        </div>
+    </div>
+
+    <script>
+        function setWeeklyRate(rate) {
+            document.getElementById('weeklyRate').value = rate;
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            updateCalculation();
+        }
+
+        function formatCurrency(num) {
+            return Math.floor(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + "원";
+        }
+
+        function formatPercent(num) {
+            return (num * 100).toFixed(2) + "%";
+        }
+
+        function calculateCompoundInterest() {
+            const principal = parseInt(document.getElementById('principal').value);
+            const weeklyRate = parseInt(document.getElementById('weeklyRate').value) / 100;
+            const periodType = document.getElementById('periodType').value;
+            const period = parseInt(document.getElementById('period').value);
+
+            // 주 단위로 변환
+            let weeks;
+            if (periodType === 'days') {
+                weeks = period / 7;
+                document.getElementById('periodHelper').textContent = period + '일 (' + period + '일 기준)';
+            } else if (periodType === 'weeks') {
+                weeks = period;
+                document.getElementById('periodHelper').textContent = period + '주';
+            } else {
+                weeks = period * 4.33; // 월 → 주
+                document.getElementById('periodHelper').textContent = period + '개월';
+            }
+
+            // 복리 계산: A = P(1+r)^n
+            const totalAmount = principal * Math.pow(1 + weeklyRate, weeks);
+            const interest = totalAmount - principal;
+
+            // 연환산 금리 계산
+            const annualRate = Math.pow(1 + weeklyRate, 52) - 1;
+
+            return {
+                principal: principal,
+                interest: interest,
+                total: totalAmount,
+                annualRate: annualRate,
+                weeks: weeks,
+                weeklyRate: weeklyRate
+            };
+        }
+
+        function generateTimeline(data) {
+            const container = document.getElementById('timelineContainer');
+            container.innerHTML = '';
+
+            const periodType = document.getElementById('periodType').value;
+            const period = parseInt(document.getElementById('period').value);
+
+            let days;
+            if (periodType === 'days') {
+                days = period;
+            } else if (periodType === 'weeks') {
+                days = period * 7;
+            } else {
+                days = Math.floor(period * 30.44);
+            }
+
+            const daysPerStep = Math.max(1, Math.floor(days / 4)); // 최대 4개 지점 표시
+
+            for (let i = 1; i <= days; i += daysPerStep) {
+                const weeksElapsed = i / 7;
+                const amountAtDay = data.principal * Math.pow(1 + data.weeklyRate, weeksElapsed);
+
+                const item = document.createElement('div');
+                item.className = 'timeline-item';
+                item.innerHTML = `
+                    <div class="timeline-day">${i}일</div>
+                    <div class="timeline-amount">${formatCurrency(amountAtDay)}</div>
+                    <div class="timeline-description">(+${formatCurrency(amountAtDay - data.principal)})</div>
+                `;
+                container.appendChild(item);
+            }
+
+            // 최종 금액
+            const finalItem = document.createElement('div');
+            finalItem.className = 'timeline-item';
+            finalItem.style.borderTop = '1px solid #333';
+            finalItem.style.paddingTop = '8px';
+            finalItem.style.marginTop = '8px';
+            finalItem.innerHTML = `
+                <div class="timeline-day" style="color: #ff2e2e;"><strong>최종</strong></div>
+                <div class="timeline-amount" style="color: #ff6b6b;"><strong>${formatCurrency(data.total)}</strong></div>
+                <div class="timeline-description" style="color: #ff6b6b;"><strong>+${formatCurrency(data.interest)}</strong></div>
+            `;
+            container.appendChild(finalItem);
+        }
+
+        function updateCalculation() {
+            const data = calculateCompoundInterest();
+
+            // 결과 표시
+            document.getElementById('resultPrincipal').textContent = formatCurrency(data.principal);
+            document.getElementById('resultInterest').textContent = formatCurrency(data.interest);
+            document.getElementById('resultTotal').textContent = formatCurrency(data.total);
+            document.getElementById('resultAnnual').textContent = formatPercent(data.annualRate);
+
+            // 그래프 업데이트
+            const totalAmount = data.total;
+            const principalPercent = (data.principal / totalAmount) * 100;
+            const interestPercent = (data.interest / totalAmount) * 100;
+
+            document.getElementById('barPrincipal').style.width = principalPercent + '%';
+            document.getElementById('barPrincipal').textContent = Math.floor(data.principal / 10000) + '만';
+
+            document.getElementById('barInterest').style.width = interestPercent + '%';
+            document.getElementById('barInterest').textContent = Math.floor(data.interest / 10000) + '만';
+
+            // 타임라인 생성
+            generateTimeline(data);
+        }
+
+        // 초기 계산
+        updateCalculation();
+
+        // 입력값 변경 시 자동 계산
+        document.getElementById('principal').addEventListener('change', updateCalculation);
+        document.getElementById('weeklyRate').addEventListener('change', updateCalculation);
+        document.getElementById('period').addEventListener('change', updateCalculation);
+        document.getElementById('periodType').addEventListener('change', updateCalculation);
+    </script>
+</body>
+</html>
